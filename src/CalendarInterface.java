@@ -4,7 +4,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 
-public class CalendarProgram {
+public class CalendarInterface extends Thread {
     static JLabel labelMonth, labelYear;
     static JButton buttonBack, buttonNext;
     static JTable tableCalendar;
@@ -16,7 +16,7 @@ public class CalendarProgram {
     static JPanel panelCalendar;
     static int realYear, realMonth, realDay, currentYear, currentMonth;
 
-    public static void main (String args[]) {
+    public void run() {
 
         try {UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());}
         catch (ClassNotFoundException e) {}
@@ -24,8 +24,6 @@ public class CalendarProgram {
         catch (IllegalAccessException e) {}
         catch (UnsupportedLookAndFeelException e) {}
 
-        Client client = new Client();
-        client.start();
 
         //Prepare frame
         mainFrame = new JFrame ("Calendar");
@@ -125,8 +123,6 @@ public class CalendarProgram {
             }
         });
     }
-
-
 
     public static void refreshCalendar(int month, int year){
         //Variables

@@ -1,77 +1,79 @@
 import javax.swing.*;
-import javax.swing.event.*;
 import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 
 public class CalendarProgram {
-    static JLabel lblMonth, lblYear;
-    static JButton btnPrev, btnNext;
-    static JTable tblCalendar;
-    static JComboBox cmbYear;
-    static JFrame frmMain;
+    static JLabel labelMonth, labelYear;
+    static JButton buttonBack, buttonNext;
+    static JTable tableCalendar;
+    static JComboBox comboBoxYear;
+    static JFrame mainFrame;
     static Container pane;
-    static DefaultTableModel mtblCalendar; //Table model
-    static JScrollPane stblCalendar; //The scrollpane
-    static JPanel pnlCalendar;
+    static DefaultTableModel modelTableCalendar; //Table model
+    static JScrollPane scrollPaneCalendar; //The scrollpane
+    static JPanel panelCalendar;
     static int realYear, realMonth, realDay, currentYear, currentMonth;
 
-    public static void main (String args[]){
-        //Look and feel
+    public static void main (String args[]) {
+
         try {UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());}
         catch (ClassNotFoundException e) {}
         catch (InstantiationException e) {}
         catch (IllegalAccessException e) {}
         catch (UnsupportedLookAndFeelException e) {}
 
+        Client client = new Client();
+        client.start();
+
         //Prepare frame
-        frmMain = new JFrame ("Calendar"); //Create frame
-        frmMain.setSize(330, 375); //Set size to 400x400 pixels
-        pane = frmMain.getContentPane(); //Get content pane
+        mainFrame = new JFrame ("Calendar");
+        mainFrame.setSize(330, 375);
+        pane = mainFrame.getContentPane(); //Get content pane
         pane.setLayout(null); //Apply null layout
-        frmMain.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); //Close when X is clicked
+        mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); //Close when X is clicked
 
         //Create controls
-        lblMonth = new JLabel ("January");
-        lblYear = new JLabel ("Year:");
-        cmbYear = new JComboBox();
-        btnPrev = new JButton ("<<");
-        btnNext = new JButton (">>");
-        mtblCalendar = new DefaultTableModel(){public boolean isCellEditable(int rowIndex, int mColIndex){return false;}};
-        tblCalendar = new JTable(mtblCalendar);
-        stblCalendar = new JScrollPane(tblCalendar);
-        pnlCalendar = new JPanel(null);
+        labelMonth = new JLabel ("January");
+        labelYear = new JLabel ("Year:");
+        comboBoxYear = new JComboBox();
+        buttonBack = new JButton ("<<");
+        buttonNext = new JButton (">>");
+        modelTableCalendar = new DefaultTableModel(){public boolean isCellEditable(int rowIndex, int mColIndex){return false;}};
+        tableCalendar = new JTable(modelTableCalendar);
+        scrollPaneCalendar = new JScrollPane(tableCalendar);
+        panelCalendar = new JPanel(null);
 
         //Set border
-        pnlCalendar.setBorder(BorderFactory.createTitledBorder("Calendar"));
+        panelCalendar.setBorder(BorderFactory.createTitledBorder("Calendar"));
 
         //Register action listeners
-        btnPrev.addActionListener(new btnPrev_Action());
-        btnNext.addActionListener(new btnNext_Action());
-        cmbYear.addActionListener(new cmbYear_Action());
+        buttonBack.addActionListener(new btnPrev_Action());
+        buttonNext.addActionListener(new btnNext_Action());
+        comboBoxYear.addActionListener(new cmbYear_Action());
 
         //Add controls to pane
-        pane.add(pnlCalendar);
-        pnlCalendar.add(lblMonth);
-        pnlCalendar.add(lblYear);
-        pnlCalendar.add(cmbYear);
-        pnlCalendar.add(btnPrev);
-        pnlCalendar.add(btnNext);
-        pnlCalendar.add(stblCalendar);
+        pane.add(panelCalendar);
+        panelCalendar.add(labelMonth);
+        panelCalendar.add(labelYear);
+        panelCalendar.add(comboBoxYear);
+        panelCalendar.add(buttonBack);
+        panelCalendar.add(buttonNext);
+        panelCalendar.add(scrollPaneCalendar);
 
         //Set bounds
-        pnlCalendar.setBounds(0, 0, 320, 335);
-        lblMonth.setBounds(160-lblMonth.getPreferredSize().width/2, 25, 100, 25);
-        lblYear.setBounds(10, 305, 80, 20);
-        cmbYear.setBounds(230, 305, 80, 20);
-        btnPrev.setBounds(10, 25, 50, 25);
-        btnNext.setBounds(260, 25, 50, 25);
-        stblCalendar.setBounds(10, 50, 300, 250);
+        panelCalendar.setBounds(0, 0, 320, 335);
+        labelMonth.setBounds(160- labelMonth.getPreferredSize().width/2, 25, 100, 25);
+        labelYear.setBounds(10, 305, 80, 20);
+        comboBoxYear.setBounds(230, 305, 80, 20);
+        buttonBack.setBounds(10, 25, 50, 25);
+        buttonNext.setBounds(260, 25, 50, 25);
+        scrollPaneCalendar.setBounds(10, 50, 300, 250);
 
         //Make frame visible
-        frmMain.setResizable(false);
-        frmMain.setVisible(true);
+        mainFrame.setResizable(false);
+        mainFrame.setVisible(true);
 
         //Get real month/year
         GregorianCalendar cal = new GregorianCalendar(); //Create calendar
@@ -84,33 +86,47 @@ public class CalendarProgram {
         //Add headers
         String[] headers = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"}; //All headers
         for (int i=0; i<7; i++){
-            mtblCalendar.addColumn(headers[i]);
+            modelTableCalendar.addColumn(headers[i]);
         }
 
-        tblCalendar.getParent().setBackground(tblCalendar.getBackground()); //Set background
+        tableCalendar.getParent().setBackground(tableCalendar.getBackground()); //Set background
 
         //No resize/reorder
-        tblCalendar.getTableHeader().setResizingAllowed(false);
-        tblCalendar.getTableHeader().setReorderingAllowed(false);
+        tableCalendar.getTableHeader().setResizingAllowed(false);
+        tableCalendar.getTableHeader().setReorderingAllowed(false);
 
         //Single cell selection
-        tblCalendar.setColumnSelectionAllowed(true);
-        tblCalendar.setRowSelectionAllowed(true);
-        tblCalendar.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tableCalendar.setColumnSelectionAllowed(true);
+        tableCalendar.setRowSelectionAllowed(true);
+        tableCalendar.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
         //Set row/column count
-        tblCalendar.setRowHeight(38);
-        mtblCalendar.setColumnCount(7);
-        mtblCalendar.setRowCount(6);
+        tableCalendar.setRowHeight(38);
+        modelTableCalendar.setColumnCount(7);
+        modelTableCalendar.setRowCount(6);
 
         //Populate table
-        for (int i=realYear-100; i<=realYear+100; i++){
-            cmbYear.addItem(String.valueOf(i));
+        for (int i=realYear-20; i<=realYear+20; i++){
+            comboBoxYear.addItem(String.valueOf(i));
         }
 
         //Refresh calendar
         refreshCalendar (realMonth, realYear); //Refresh calendar
+
+        tableCalendar.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                int row = tableCalendar.rowAtPoint(evt.getPoint());
+                int col = tableCalendar.columnAtPoint(evt.getPoint());
+                if (row >= 0 && col >= 0) {
+                    System.out.println(row+"-"+col);
+
+                }
+            }
+        });
     }
+
+
 
     public static void refreshCalendar(int month, int year){
         //Variables
@@ -118,18 +134,20 @@ public class CalendarProgram {
         int nod, som; //Number Of Days, Start Of Month
 
         //Allow/disallow buttons
-        btnPrev.setEnabled(true);
-        btnNext.setEnabled(true);
-        if (month == 0 && year <= realYear-10){btnPrev.setEnabled(false);} //Too early
-        if (month == 11 && year >= realYear+100){btnNext.setEnabled(false);} //Too late
-        lblMonth.setText(months[month]); //Refresh the month label (at the top)
-        lblMonth.setBounds(160-lblMonth.getPreferredSize().width/2, 25, 180, 25); //Re-align label with calendar
-        cmbYear.setSelectedItem(String.valueOf(year)); //Select the correct year in the combo box
+        buttonBack.setEnabled(true);
+        buttonNext.setEnabled(true);
+        if (month == 0 && year <= realYear-10){
+            buttonBack.setEnabled(false);} //Too early
+        if (month == 11 && year >= realYear+100){
+            buttonNext.setEnabled(false);} //Too late
+        labelMonth.setText(months[month]); //Refresh the month label (at the top)
+        labelMonth.setBounds(160- labelMonth.getPreferredSize().width/2, 25, 180, 25); //Re-align label with calendar
+        comboBoxYear.setSelectedItem(String.valueOf(year)); //Select the correct year in the combo box
 
         //Clear table
         for (int i=0; i<6; i++){
             for (int j=0; j<7; j++){
-                mtblCalendar.setValueAt(null, i, j);
+                modelTableCalendar.setValueAt(null, i, j);
             }
         }
 
@@ -142,11 +160,11 @@ public class CalendarProgram {
         for (int i=1; i<=nod; i++){
             int row = new Integer((i+som-2)/7);
             int column  =  (i+som-2)%7;
-            mtblCalendar.setValueAt(i, row, column);
+            modelTableCalendar.setValueAt(i, row, column);
         }
 
         //Apply renderers
-        tblCalendar.setDefaultRenderer(tblCalendar.getColumnClass(0), new tblCalendarRenderer());
+        tableCalendar.setDefaultRenderer(tableCalendar.getColumnClass(0), new tblCalendarRenderer());
     }
 
     static class tblCalendarRenderer extends DefaultTableCellRenderer{
@@ -197,8 +215,8 @@ public class CalendarProgram {
 
     static class cmbYear_Action implements ActionListener{
         public void actionPerformed (ActionEvent e){
-            if (cmbYear.getSelectedItem() != null){
-                String b = cmbYear.getSelectedItem().toString();
+            if (comboBoxYear.getSelectedItem() != null){
+                String b = comboBoxYear.getSelectedItem().toString();
                 currentYear = Integer.parseInt(b);
                 refreshCalendar(currentMonth, currentYear);
             }

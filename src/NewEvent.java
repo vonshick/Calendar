@@ -31,14 +31,24 @@ public class NewEvent {
             public void actionPerformed(ActionEvent e) {
                 String name = txtName.getText();
                 String description = txtDescription.getText();
+
                 int startHour = (int)cmbStartHour.getSelectedItem();
                 int endHour = (int)cmbEndHour.getSelectedItem();
                 int startMinutes = (int)cmbStartMinutes.getSelectedItem();
                 int endMinutes = (int)cmbEndMinutes.getSelectedItem();
-                Event event = new Event(name, startHour, startMinutes, endHour, endMinutes, description, day, year, month);
-                Main.eventsList.add(event);
-                //tu akcja, która wyśle eventa na serwer
-                frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+                if(name.equals("")){
+                    JOptionPane.showMessageDialog(frame, "Event's name can't be empty!");
+                }
+                else {
+                    if (startHour < endHour || startHour==endHour && startMinutes<endMinutes) {
+                        Event event = new Event(name, startHour, startMinutes, endHour, endMinutes, description, day, year, month);
+                        Main.eventsList.add(event);
+                        //tu akcja, która wyśle eventa na serwer
+                        frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+                    }else{
+                        JOptionPane.showMessageDialog(frame, "Start hour has to be earlier than the end hour!");
+                    }
+                }
             }
         } );
 

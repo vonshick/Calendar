@@ -69,6 +69,11 @@ public class CalendarInterface extends Thread {
 //        panelCalendar.add(tableCalendar);
 
         //Set bounds
+
+        Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
+        int x = (int) ((dimension.getWidth() - mainFrame.getWidth()) / 2);
+        int y = (int) ((dimension.getHeight() - mainFrame.getHeight()) / 2);
+        mainFrame.setLocation(x, y);
 //        panelCalendar.setBounds(0, 0, 320, 335);
         panelCalendar.setBounds(0, 0, 320, 340);
         labelMonth.setBounds(160 - labelMonth.getPreferredSize().width / 2, 25, 100, 25);
@@ -220,9 +225,11 @@ public class CalendarInterface extends Thread {
         public void mouseClicked(java.awt.event.MouseEvent evt) {
                 int row = tableCalendar.rowAtPoint(evt.getPoint());
                 int col = tableCalendar.columnAtPoint(evt.getPoint());
-                if (row >= 0 && col >= 0) {
-                    System.out.println(row+"-"+col);
+                String day = String.valueOf(modelTableCalendar.getValueAt(row, col));
+                if (evt.getClickCount() == 2 && tableCalendar.getSelectedRow() != -1) {
+                    DayBrowser browser = new DayBrowser(day, currentMonth, currentYear);
                 }
+//                DayBrowser browser = new DayBrowser(day, currentMonth, currentYear);
         }
         public void mousePressed(java.awt.event.MouseEvent evt) {}
         public void mouseReleased(java.awt.event.MouseEvent evt) {}

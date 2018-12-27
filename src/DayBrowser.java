@@ -13,8 +13,6 @@ public class DayBrowser {
     private JList<String> eventsList;
 
     public DayBrowser(String day, int month, int year) {
-
-
         String[] months = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
         frame = new JFrame(day+" "+months[month]+" "+Integer.toString(year));
         frame.setSize(400, 500);
@@ -58,6 +56,12 @@ public class DayBrowser {
                 if (selectedIndex != -1) {
                     model.remove(selectedIndex);
                 }
+            }
+        } );
+
+        btnAdd.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                NewEvent newEvent = new NewEvent(day, month, year);
             }
         } );
 

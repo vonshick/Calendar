@@ -229,7 +229,6 @@ public class CalendarInterface extends Thread {
                 if (evt.getClickCount() == 2 && tableCalendar.getSelectedRow() != -1) {
                     DayBrowser browser = new DayBrowser(day, currentMonth, currentYear);
                 }
-//                DayBrowser browser = new DayBrowser(day, currentMonth, currentYear);
         }
         public void mousePressed(java.awt.event.MouseEvent evt) {}
         public void mouseReleased(java.awt.event.MouseEvent evt) {}

@@ -1,7 +1,10 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.*;
 
-public class NewEvent {private JFrame frame;
+
+public class NewEvent {
+    private JFrame frame;
     private JButton btnAdd;
     private JPanel panel;
     private Container pane;
@@ -9,9 +12,7 @@ public class NewEvent {private JFrame frame;
     private JTextArea txtName, txtDescription;
     private JLabel labName, labStartHour, labEndHour, labDescription;
 
-    public NewEvent(String day, int month, int year) {
-//        String[] months = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
-//        frame = new JFrame(day+" "+months[month]+" "+Integer.toString(year));
+    public NewEvent(int day, int month, int year) {
         frame = new JFrame("Add new event");
         frame.setSize(400, 500);
 
@@ -26,11 +27,20 @@ public class NewEvent {private JFrame frame;
         addElementsToPanel();
         setElementsBounds();
 
-//        btnAdd.addActionListener(new ActionListener() {
-//            public void actionPerformed(ActionEvent e) {
-//
-//            }
-//        } );
+        btnAdd.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String name = txtName.getText();
+                String description = txtDescription.getText();
+                int startHour = (int)cmbStartHour.getSelectedItem();
+                int endHour = (int)cmbEndHour.getSelectedItem();
+                int startMinutes = (int)cmbStartMinutes.getSelectedItem();
+                int endMinutes = (int)cmbEndMinutes.getSelectedItem();
+                Event event = new Event(name, startHour, startMinutes, endHour, endMinutes, description, day, year, month);
+                Main.eventsList.add(event);
+                //tu akcja, która wyśle eventa na serwer
+                frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+            }
+        } );
 
         frame.setResizable(false);
         frame.setVisible(true);

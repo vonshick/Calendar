@@ -26,9 +26,12 @@ public class DayBrowser {
         //add elements to the list
         DefaultListModel model = new DefaultListModel();
         eventsList = new JList(model);
-        for ( int i = 0; i < months.length; i++ ){
-            model.addElement(months[i]);
+        for(Event event: Main.eventsList){
+            model.addElement(event.getName());
         }
+//        for ( int i = 0; i < months.length; i++ ){
+//            model.addElement(months[i]);
+//        }
 
         scrollPane = new JScrollPane(eventsList);
         btnAdd = new JButton("New event" );
@@ -54,7 +57,12 @@ public class DayBrowser {
                 DefaultListModel model = (DefaultListModel) eventsList.getModel();
                 int selectedIndex = eventsList.getSelectedIndex();
                 if (selectedIndex != -1) {
+                    //tu usuwamy z serwera!
+                    //dopiero potem z klienta
+                    String eventName = eventsList.getSelectedValue();
+                    System.out.println(eventName);
                     model.remove(selectedIndex);
+                    Main.eventsList.remove(new Event(eventName));
                 }
             }
         } );

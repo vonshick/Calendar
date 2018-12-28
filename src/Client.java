@@ -4,41 +4,34 @@ import java.util.Scanner;
 
 
 public class Client extends Thread{
-    Socket clientSocket;
-    BufferedReader reader;
-    PrintWriter writer;
-    String host;
-    int port;
+    private Socket clientSocket;
+    private BufferedReader reader;
+    private PrintWriter writer;
+    private String host;
+    private int port;
 
     public Client(String host, int port) {
         this.host = host;
         this.port = port;
-    }
 
-    public void run() {
-//        Socket clientSocket = null;
         try {
-//            clientSocket = new Socket("localhost", 1234);
             clientSocket = new Socket(host, port);
-//            reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-//            writer = new PrintWriter(clientSocket.getOutputStream(), true);
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        BufferedReader reader = null;
         try {
             reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        PrintWriter writer = null;
         try {
             writer = new PrintWriter(clientSocket.getOutputStream(), true);
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void run() {
 
         while(true) {
             Scanner scanner = new Scanner(System.in);
@@ -66,6 +59,10 @@ public class Client extends Thread{
                 System.out.println("Podałeś złą liczbę - podaj ją jeszcze raz.\n");
             }
         }
+    }
+
+    public void sendData(String message){
+        writer.println(message);
     }
 }
 

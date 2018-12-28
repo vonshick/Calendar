@@ -1,6 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 
 
 public class NewEvent {
@@ -40,13 +41,27 @@ public class NewEvent {
                     JOptionPane.showMessageDialog(frame, "Event's name can't be empty!");
                 }
                 else {
-                    if (startHour < endHour || startHour==endHour && startMinutes<endMinutes) {
-                        Event event = new Event(name, startHour, startMinutes, endHour, endMinutes, description, day, year, month);
-                        Main.eventsList.add(event);
-                        //tu akcja, która wyśle eventa na serwer
-                        frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
-                    }else{
-                        JOptionPane.showMessageDialog(frame, "Start hour has to be earlier than the end hour!");
+                    if(description.equals("")){
+                        JOptionPane.showMessageDialog(frame, "Event's description can not be empty");
+                    }
+                    else {
+                        if (startHour > endHour || startHour==endHour && startMinutes>endMinutes) {
+                            JOptionPane.showMessageDialog(frame, "Start time has to be earlier than the end time");
+                        } else {
+                            if (description.contains("~") || name.contains("~")){
+                                JOptionPane.showMessageDialog(frame, "Text can not contain '~' character");
+                            }else{
+                                Event event = new Event(name, startHour, startMinutes, endHour, endMinutes, description, day, month, year);
+                                try{
+                                    Main.tcpClient.sendData(event.concatenateData());
+                                    Main.eventsList.add(event);
+                                } catch(Exception writeException) {
+                                    writeException.printStackTrace();
+                                }
+                                //tu akcja, która wyśle eventa na serwer
+                                frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+                            }
+                        }
                     }
                 }
             }

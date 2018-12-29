@@ -1,6 +1,8 @@
+import javax.swing.*;
 import java.io.*;
 import java.net.Socket;
 import java.util.Scanner;
+import java.util.regex.Pattern;
 
 
 public class Client extends Thread{
@@ -10,7 +12,7 @@ public class Client extends Thread{
     private String host;
     private int port;
 
-    public Client(String host, int port) {
+    Client(String host, int port) {
         this.host = host;
         this.port = port;
 
@@ -33,35 +35,54 @@ public class Client extends Thread{
 
     public void run() {
 
-        while(true) {
-            Scanner scanner = new Scanner(System.in);
-            System.out.println("Podaj odpowiednia liczbe:\n- przesyl: 1\n- odczyt: 2");
-            String choice = scanner.nextLine();
-            if (choice.equals("1")){
-                System.out.println("Podaj wiadomosc do przeslania:\n");
-                String string = scanner.nextLine();
-                writer.println(string);
-            } else if( choice.equals("2")){
-                String serverMessage = null;
-                try {
-                    serverMessage = reader.readLine();
-                    if (serverMessage == null){
-                        clientSocket.close();
-                        break;
-                    }
-                    else {
-                        System.out.println(serverMessage);
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
+        while(true){
+            String serverMessage;
+            try {
+                serverMessage = reader.readLine();
+                if (serverMessage == null){
+                    clientSocket.close();
+                    break;
                 }
-            } else {
-                System.out.println("Podałeś złą liczbę - podaj ją jeszcze raz.\n");
+                else if (serverMessage.equals("loaded")) {
+                    System.out.println("Mamy to!");
+                    break;
+                }else{
+                    System.out.println(serverMessage);
+                    String[] parts = serverMessage.split(Pattern.quote("~"));
+                    Main.eventsList.add(new Event(parts[0], parts[1], parts[2],
+                            parts[3], parts[4], parts[5], parts[6], parts[7], parts[8]));
+                    for(String str : parts){
+                        System.out.println(str);
+                    }
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        while(true){
+            String serverMessage;
+            try {
+                serverMessage = reader.readLine();
+                if (serverMessage == null){
+                    clientSocket.close();
+//                    System.out.println("");
+                    JFrame frame = new JFrame();
+                    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); //Close when X is clicked
+                    JOptionPane.showMessageDialog(frame, "Server connection lost");
+                    System.exit(0);
+                }
+                else {
+                    System.out.println(serverMessage);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }
 
-    public void sendData(String message){
+    void sendData(String message){
         writer.println(message);
     }
 }

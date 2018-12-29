@@ -5,25 +5,24 @@ import java.awt.event.*;
 import java.util.*;
 
 public class CalendarInterface extends Thread {
-    static JLabel labelMonth, labelYear;
-    static JButton buttonBack, buttonNext;
-    static JComboBox comboBoxYear;
-    static JTable tableCalendar;
-    static JFrame mainFrame;
-    static JPanel panelCalendar;
-    static Container pane;
-    static DefaultTableModel modelTableCalendar; //Table model
-    static JScrollPane scrollPaneCalendar; //The scrollpane
-    static int realYear, realMonth, realDay, currentYear, currentMonth;
+    private static JLabel labelMonth, labelYear;
+    private static JButton buttonBack, buttonNext;
+    private static JComboBox<String> comboBoxYear;
+    private static JTable tableCalendar;
+    private static JFrame mainFrame;
+    private static JPanel panelCalendar;
+    private static Container pane;
+    private static DefaultTableModel modelTableCalendar; //Table model
+    private static JScrollPane scrollPaneCalendar; //The scrollpane
+    private static int realYear, realMonth, realDay, currentYear, currentMonth;
 
     public void run() {
 
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (ClassNotFoundException e) {
-        } catch (InstantiationException e) {
-        } catch (IllegalAccessException e) {
-        } catch (UnsupportedLookAndFeelException e) {
+            e.printStackTrace();
+        } catch (InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ignored) {
         }
 
 
@@ -37,7 +36,7 @@ public class CalendarInterface extends Thread {
         //Create controls
         labelMonth = new JLabel("January");
         labelYear = new JLabel("Year:");
-        comboBoxYear = new JComboBox();
+        comboBoxYear = new JComboBox<>();
         buttonBack = new JButton("<<");
         buttonNext = new JButton(">>");
         modelTableCalendar = new DefaultTableModel() {
@@ -53,10 +52,10 @@ public class CalendarInterface extends Thread {
 //        panelCalendar.setBorder(BorderFactory.createTitledBorder("Calendar"));
 
         //Register action listeners
-        buttonBack.addActionListener(new btnPrevAction());
-        buttonNext.addActionListener(new btnNextAction());
-        comboBoxYear.addActionListener(new cmbYearAction());
-        tableCalendar.addMouseListener(new cellAction());
+//        buttonBack.addActionListener(new btnPrevAction());
+//        buttonNext.addActionListener(new btnNextAction());
+//        comboBoxYear.addActionListener(new cmbYearAction());
+//        tableCalendar.addMouseListener(new cellAction());
 
         //Add controls to pane
         pane.add(panelCalendar);
@@ -125,9 +124,55 @@ public class CalendarInterface extends Thread {
 
         //Refresh calendar
         refreshCalendar(realMonth, realYear);
+
+
+        buttonBack.addActionListener(e -> {
+            if (currentMonth == 0) { //Back one year
+                currentMonth = 11;
+                currentYear -= 1;
+            } else { //Back one month
+                currentMonth -= 1;
+            }
+            refreshCalendar(currentMonth, currentYear);
+        });
+
+        buttonNext.addActionListener(e -> {
+            if (currentMonth == 11) { //Foward one year
+                currentMonth = 0;
+                currentYear += 1;
+            } else { //Foward one month
+                currentMonth += 1;
+            }
+            refreshCalendar(currentMonth, currentYear);
+        });
+
+        comboBoxYear.addActionListener(e -> {
+            if (comboBoxYear.getSelectedItem() != null) {
+                String b = comboBoxYear.getSelectedItem().toString();
+                currentYear = Integer.parseInt(b);
+                refreshCalendar(currentMonth, currentYear);
+            }
+        });
+
+        tableCalendar.addMouseListener(new MouseListener() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                int row = tableCalendar.rowAtPoint(evt.getPoint());
+                int col = tableCalendar.columnAtPoint(evt.getPoint());
+                String day = String.valueOf(modelTableCalendar.getValueAt(row, col));
+                if (evt.getClickCount() == 2 && tableCalendar.getSelectedRow() != -1) {
+                    DayBrowser browser = new DayBrowser(Integer.parseInt(day), currentMonth, currentYear);
+                }
+            }
+            public void mousePressed(java.awt.event.MouseEvent evt) {}
+            public void mouseReleased(java.awt.event.MouseEvent evt) {}
+            public void mouseEntered(java.awt.event.MouseEvent evt) {}
+            public void mouseExited(java.awt.event.MouseEvent evt) {}
+        });
+
+
     }
 
-    public static void refreshCalendar(int month, int year) {
+    private static void refreshCalendar(int month, int year) {
         //Variables
         String[] months = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
         int daysCount, monthStart; //Number Of Days, Start Of Month
@@ -159,7 +204,7 @@ public class CalendarInterface extends Thread {
 
         //Draw calendar
         for (int i = 1; i <= daysCount; i++) {
-            int row = new Integer((i + monthStart - 2) / 7);
+            int row = (i + monthStart - 2) / 7;
             int column = (i + monthStart - 2) % 7;
             modelTableCalendar.setValueAt(i, row, column);
         }
@@ -186,54 +231,4 @@ public class CalendarInterface extends Thread {
             return this;
         }
     }
-
-    static class btnPrevAction implements ActionListener {
-        public void actionPerformed(ActionEvent e) {
-            if (currentMonth == 0) { //Back one year
-                currentMonth = 11;
-                currentYear -= 1;
-            } else { //Back one month
-                currentMonth -= 1;
-            }
-            refreshCalendar(currentMonth, currentYear);
-        }
-    }
-
-    static class btnNextAction implements ActionListener {
-        public void actionPerformed(ActionEvent e) {
-            if (currentMonth == 11) { //Foward one year
-                currentMonth = 0;
-                currentYear += 1;
-            } else { //Foward one month
-                currentMonth += 1;
-            }
-            refreshCalendar(currentMonth, currentYear);
-        }
-    }
-
-    static class cmbYearAction implements ActionListener {
-        public void actionPerformed(ActionEvent e) {
-            if (comboBoxYear.getSelectedItem() != null) {
-                String b = comboBoxYear.getSelectedItem().toString();
-                currentYear = Integer.parseInt(b);
-                refreshCalendar(currentMonth, currentYear);
-            }
-        }
-    }
-
-    static class cellAction implements MouseListener {
-        public void mouseClicked(java.awt.event.MouseEvent evt) {
-                int row = tableCalendar.rowAtPoint(evt.getPoint());
-                int col = tableCalendar.columnAtPoint(evt.getPoint());
-                String day = String.valueOf(modelTableCalendar.getValueAt(row, col));
-                if (evt.getClickCount() == 2 && tableCalendar.getSelectedRow() != -1) {
-                    DayBrowser browser = new DayBrowser(Integer.parseInt(day), currentMonth, currentYear);
-                }
-        }
-        public void mousePressed(java.awt.event.MouseEvent evt) {}
-        public void mouseReleased(java.awt.event.MouseEvent evt) {}
-        public void mouseEntered(java.awt.event.MouseEvent evt) {}
-        public void mouseExited(java.awt.event.MouseEvent evt) {}
-    }
-
 }

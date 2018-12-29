@@ -1,19 +1,18 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.IOException;
 
 
-public class NewEvent {
-    private JFrame frame;
+class NewEvent {
+    private final JFrame frame;
     private JButton btnAdd;
     private JPanel panel;
-    private Container pane;
+    //    private Container pane;
     private JComboBox<Integer> cmbStartHour, cmbStartMinutes, cmbEndHour, cmbEndMinutes;
     private JTextArea txtName, txtDescription;
     private JLabel labName, labStartHour, labEndHour, labDescription;
 
-    public NewEvent(int day, int month, int year) {
+    NewEvent(int day, int month, int year) {
         frame = new JFrame("Add new event");
         frame.setSize(400, 500);
 
@@ -28,44 +27,42 @@ public class NewEvent {
         addElementsToPanel();
         setElementsBounds();
 
-        btnAdd.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                String name = txtName.getText();
-                String description = txtDescription.getText();
+        btnAdd.addActionListener(e -> {
+            String name = txtName.getText();
+            String description = txtDescription.getText();
 
-                int startHour = (int)cmbStartHour.getSelectedItem();
-                int endHour = (int)cmbEndHour.getSelectedItem();
-                int startMinutes = (int)cmbStartMinutes.getSelectedItem();
-                int endMinutes = (int)cmbEndMinutes.getSelectedItem();
-                if(name.equals("")){
-                    JOptionPane.showMessageDialog(frame, "Event's name can't be empty!");
+            int startHour = (int)cmbStartHour.getSelectedItem();
+            int endHour = (int)cmbEndHour.getSelectedItem();
+            int startMinutes = (int)cmbStartMinutes.getSelectedItem();
+            int endMinutes = (int)cmbEndMinutes.getSelectedItem();
+            if(name.equals("")){
+                JOptionPane.showMessageDialog(frame, "Event's name can't be empty!");
+            }
+            else {
+                if(description.equals("")){
+                    JOptionPane.showMessageDialog(frame, "Event's description can not be empty");
                 }
                 else {
-                    if(description.equals("")){
-                        JOptionPane.showMessageDialog(frame, "Event's description can not be empty");
-                    }
-                    else {
-                        if (startHour > endHour || startHour==endHour && startMinutes>endMinutes) {
-                            JOptionPane.showMessageDialog(frame, "Start time has to be earlier than the end time");
-                        } else {
-                            if (description.contains("~") || name.contains("~")){
-                                JOptionPane.showMessageDialog(frame, "Text can not contain '~' character");
-                            }else{
-                                Event event = new Event(name, startHour, startMinutes, endHour, endMinutes, description, day, month, year);
-                                try{
-                                    Main.tcpClient.sendData(event.concatenateData());
-                                    Main.eventsList.add(event);
-                                } catch(Exception writeException) {
-                                    writeException.printStackTrace();
-                                }
-                                //tu akcja, która wyśle eventa na serwer
-                                frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+                    if (startHour > endHour || startHour==endHour && startMinutes>endMinutes) {
+                        JOptionPane.showMessageDialog(frame, "Start time has to be earlier than the end time");
+                    } else {
+                        if (description.contains("~") || name.contains("~")){
+                            JOptionPane.showMessageDialog(frame, "Text can not contain '~' character");
+                        }else{
+                            Event event = new Event(name, Integer.toString(startHour), Integer.toString(startMinutes), Integer.toString(endHour), Integer.toString(endMinutes),
+                                    description, Integer.toString(day), Integer.toString(month), Integer.toString(year));
+                            try{
+                                Main.tcpClient.sendData(event.concatenateData());
+                                Main.eventsList.add(event);
+                            } catch(Exception writeException) {
+                                writeException.printStackTrace();
                             }
+                            frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
                         }
                     }
                 }
             }
-        } );
+        });
 
         frame.setResizable(false);
         frame.setVisible(true);
@@ -80,16 +77,16 @@ public class NewEvent {
         labStartHour = new JLabel("Start hour");
         btnAdd = new JButton("Add" );
         panel = new JPanel(null);
-        pane = frame.getContentPane();
+        Container pane = frame.getContentPane();
         pane.setLayout(null);
         pane.add(panel);
     }
 
     private void setUpComboBoxes(){
-        cmbStartHour = new JComboBox<Integer>();
-        cmbStartMinutes = new JComboBox<Integer>();
-        cmbEndHour = new JComboBox<Integer>();
-        cmbEndMinutes = new JComboBox<Integer>();
+        cmbStartHour = new JComboBox<>();
+        cmbStartMinutes = new JComboBox<>();
+        cmbEndHour = new JComboBox<>();
+        cmbEndMinutes = new JComboBox<>();
 
         for (int i = 0; i < 24; i++) {
             cmbStartHour.addItem(i);

@@ -1,19 +1,19 @@
 public class Event {
     private String name;
     private String description;
-    private int startHour;
-    private int startMinutes;
-    private int endHour;
-    private int endMinutes;
-    private int day;
-    private int year;
-    private int month;
+    private String startHour;
+    private String startMinutes;
+    private String endHour;
+    private String endMinutes;
+    private String day;
+    private String year;
+    private String month;
 
-    public Event(String name) {
+    Event(String name) {
         this.name = name;
     }
 
-    public Event(String name, int startHour, int startMinutes, int endHour, int endMinutes, String description, int day, int month, int year) {
+    Event(String name, String startHour, String startMinutes, String endHour, String endMinutes, String description, String day, String month, String year) {
         this.name = name;
         this.startHour = startHour;
         this.startMinutes = startMinutes;
@@ -33,13 +33,13 @@ public class Event {
         return o.getName().equals(this.name);
     }
 
-    public String concatenateData(){
-        return name+"~"+Integer.toString(startHour)+"~"+Integer.toString(startMinutes)+"~"+
-                Integer.toString(endHour)+"~"+Integer.toString(endMinutes)+"~"+description+"~"+
-                Integer.toString(day)+"~"+Integer.toString(month)+"~"+Integer.toString(year);
+    String concatenateData(){
+        return name+"~"+startHour+"~"+startMinutes+"~"+
+                endHour+"~"+endMinutes+"~"+description+"~"+
+                day+"~"+month+"~"+year;
     }
 
-    public String getName() {
+    String getName() {
         return name;
     }
 
@@ -47,31 +47,31 @@ public class Event {
         return description;
     }
 
-    public int getStartHour() {
+    public String getStartHour() {
         return startHour;
     }
 
-    public int getStartMinutes() {
+    public String getStartMinutes() {
         return startMinutes;
     }
 
-    public int getEndHour() {
+    public String getEndHour() {
         return endHour;
     }
 
-    public int getEndMinutes() {
+    public String getEndMinutes() {
         return endMinutes;
     }
 
-    public int getDay() {
+    public String getDay() {
         return day;
     }
 
-    public int getYear() {
+    public String getYear() {
         return year;
     }
 
-    public int getMonth() {
+    public String getMonth() {
         return month;
     }
 
@@ -83,31 +83,31 @@ public class Event {
         this.description = description;
     }
 
-    public void setStartHour(int startHour) {
+    public void setStartHour(String startHour) {
         this.startHour = startHour;
     }
 
-    public void setStartMinutes(int startMinutes) {
+    public void setStartMinutes(String startMinutes) {
         this.startMinutes = startMinutes;
     }
 
-    public void setEndHour(int endHour) {
+    public void setEndHour(String endHour) {
         this.endHour = endHour;
     }
 
-    public void setEndMinutes(int endMinutes) {
+    public void setEndMinutes(String endMinutes) {
         this.endMinutes = endMinutes;
     }
 
-    public void setDay(int day) {
+    public void setDay(String day) {
         this.day = day;
     }
 
-    public void setYear(int year) {
+    public void setYear(String year) {
         this.year = year;
     }
 
-    public void setMonth(int month) {
+    public void setMonth(String month) {
         this.month = month;
     }
 }

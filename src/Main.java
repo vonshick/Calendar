@@ -6,7 +6,8 @@ public class Main {
     static Client tcpClient;
     public static void main (String[] args) {
         eventsList = new ArrayList<>();
-//        eventsList.add(new Event("czary", 1,1,2,2, "bla bla", 1,1,2018));
+        eventsList.add(new Event("czary", "1","1","2","2", "bla bla", "29","11","2018"));
+        eventsList.add(new Event("mary", "1","1","2","2", "bla bla", "29","11","2018"));
 //        eventsList.add(new Event("mary", 1,1,2,2, "bla bla", 1,1,2018));
 //        eventsList.add(new Event("hokus", 1,1,2,2, "bla bla", 1,1,2018));
 //        eventsList.add(new Event("pokus", 1,1,2,2, "bla bla", 1,1,2018));

@@ -47,16 +47,27 @@ int events_num = 0;
 
 void createSample(){
     events[0] = malloc(sizeof(struct event));
-    strcpy((*events[0]).name, "czary");
+    strcpy((*events[0]).name, "siema_serwer");
     strcpy((*events[0]).start_hour, "1");
     strcpy((*events[0]).start_minutes, "2");
     strcpy((*events[0]).end_hour, "3");
     strcpy((*events[0]).end_minutes, "4");
     strcpy((*events[0]).description, "WITAM");
     strcpy((*events[0]).day, "12");
-    strcpy((*events[0]).month, "12");
+    strcpy((*events[0]).month, "11");
     strcpy((*events[0]).year, "2018");
-    events_num=1;
+
+    events[1] = malloc(sizeof(struct event));
+    strcpy((*events[1]).name, "jol_serwer");
+    strcpy((*events[1]).start_hour, "1");
+    strcpy((*events[1]).start_minutes, "2");
+    strcpy((*events[1]).end_hour, "3");
+    strcpy((*events[1]).end_minutes, "4");
+    strcpy((*events[1]).description, "WITAM");
+    strcpy((*events[1]).day, "12");
+    strcpy((*events[1]).month, "11");
+    strcpy((*events[1]).year, "2018");
+    events_num=2;
 }
 void createEvent(char *data_chain)
 {

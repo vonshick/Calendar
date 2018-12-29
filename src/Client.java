@@ -41,7 +41,10 @@ public class Client extends Thread{
                 serverMessage = reader.readLine();
                 if (serverMessage == null){
                     clientSocket.close();
-                    break;
+                    JFrame frame = new JFrame();
+                    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); //Close when X is clicked
+                    JOptionPane.showMessageDialog(frame, "Server connection lost");
+                    System.exit(0);
                 }
                 else if (serverMessage.equals("loaded")) {
                     System.out.println("Mamy to!");
@@ -51,9 +54,9 @@ public class Client extends Thread{
                     String[] parts = serverMessage.split(Pattern.quote("~"));
                     Main.eventsList.add(new Event(parts[0], parts[1], parts[2],
                             parts[3], parts[4], parts[5], parts[6], parts[7], parts[8]));
-                    for(String str : parts){
-                        System.out.println(str);
-                    }
+//                    for(String str : parts){
+//                        System.out.println(str);
+//                    }
                 }
 
             } catch (IOException e) {
@@ -67,7 +70,6 @@ public class Client extends Thread{
                 serverMessage = reader.readLine();
                 if (serverMessage == null){
                     clientSocket.close();
-//                    System.out.println("");
                     JFrame frame = new JFrame();
                     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); //Close when X is clicked
                     JOptionPane.showMessageDialog(frame, "Server connection lost");

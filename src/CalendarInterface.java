@@ -25,15 +25,14 @@ public class CalendarInterface extends Thread {
         } catch (InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ignored) {
         }
 
-
-        //Prepare frame
+        //Frame preparing
         mainFrame = new JFrame("Calendar");
         mainFrame.setSize(330, 375);
         pane = mainFrame.getContentPane(); //Get content pane
         pane.setLayout(null); //Apply null layout
         mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); //Close when X is clicked
 
-        //Create controls
+        //Controls
         labelMonth = new JLabel("January");
         labelYear = new JLabel("Year:");
         comboBoxYear = new JComboBox<>();
@@ -48,16 +47,6 @@ public class CalendarInterface extends Thread {
         scrollPaneCalendar = new JScrollPane(tableCalendar);
         panelCalendar = new JPanel(null);
 
-        //Set border
-//        panelCalendar.setBorder(BorderFactory.createTitledBorder("Calendar"));
-
-        //Register action listeners
-//        buttonBack.addActionListener(new btnPrevAction());
-//        buttonNext.addActionListener(new btnNextAction());
-//        comboBoxYear.addActionListener(new cmbYearAction());
-//        tableCalendar.addMouseListener(new cellAction());
-
-        //Add controls to pane
         pane.add(panelCalendar);
         panelCalendar.add(labelMonth);
         panelCalendar.add(labelYear);
@@ -65,29 +54,24 @@ public class CalendarInterface extends Thread {
         panelCalendar.add(buttonBack);
         panelCalendar.add(buttonNext);
         panelCalendar.add(scrollPaneCalendar);
-//        panelCalendar.add(tableCalendar);
-
-        //Set bounds
 
         Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
         int x = (int) ((dimension.getWidth() - mainFrame.getWidth()) / 2);
         int y = (int) ((dimension.getHeight() - mainFrame.getHeight()) / 2);
         mainFrame.setLocation(x, y);
-//        panelCalendar.setBounds(0, 0, 320, 335);
         panelCalendar.setBounds(0, 0, 320, 340);
         labelMonth.setBounds(160 - labelMonth.getPreferredSize().width / 2, 25, 100, 25);
         labelYear.setBounds(10, 310, 80, 20);
         comboBoxYear.setBounds(230, 310, 80, 20);
         buttonBack.setBounds(10, 25, 50, 25);
         buttonNext.setBounds(260, 25, 50, 25);
-//        tableCalendar.setBounds(10,50,300,255);
         scrollPaneCalendar.setBounds(10, 50, 300, 255);
 
-        //Make frame visible
+        //make it visible
         mainFrame.setResizable(false);
         mainFrame.setVisible(true);
 
-        //Get real month/year
+        //Get current date
         GregorianCalendar cal = new GregorianCalendar(); //Create calendar
         realDay = cal.get(GregorianCalendar.DAY_OF_MONTH); //Get day
         realMonth = cal.get(GregorianCalendar.MONTH); //Get month
@@ -96,12 +80,10 @@ public class CalendarInterface extends Thread {
         currentYear = realYear;
 
         //Add headers
-        String[] headers = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"}; //All headers
+        String[] headers = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
         for (int i = 0; i < 7; i++) {
             modelTableCalendar.addColumn(headers[i]);
         }
-
-//        tableCalendar.getParent().setBackground(tableCalendar.getBackground()); //Set background
 
         //No resize/reorder
         tableCalendar.getTableHeader().setResizingAllowed(false);
@@ -121,10 +103,8 @@ public class CalendarInterface extends Thread {
         for (int i = realYear - 10; i <= realYear + 10; i++) {
             comboBoxYear.addItem(String.valueOf(i));
         }
-
         //Refresh calendar
         refreshCalendar(realMonth, realYear);
-
 
         buttonBack.addActionListener(e -> {
             if (currentMonth == 0) { //Back one year

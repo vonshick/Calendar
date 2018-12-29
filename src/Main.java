@@ -14,7 +14,6 @@ public class Main {
 //        eventsList.add(new Event("simsala", 1,1,2,2, "bla bla", 1,1,2018));
 //        eventsList.add(new Event("simsala", 1,1,2,2, "bla bla", 1,1,2018));
 
-
 //        Scanner scanner = new Scanner(System.in);
 //        System.out.println("Pass server IP address:\n");
 //        String host = scanner.nextLine();
@@ -24,6 +23,8 @@ public class Main {
         String host = "localhost";
         tcpClient = new Client(host, port);
         tcpClient.start();
+//        tcpClient.sendData("delete");
+
         new CalendarInterface().start();
     }
 }

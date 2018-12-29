@@ -48,9 +48,10 @@ class NewEvent {
                     } else {
                         if (description.contains("~") || name.contains("~")){
                             JOptionPane.showMessageDialog(frame, "Text can not contain '~' character");
-                        }else{
-                            Event event = new Event(name, Integer.toString(startHour), Integer.toString(startMinutes), Integer.toString(endHour), Integer.toString(endMinutes),
-                                    description, Integer.toString(day), Integer.toString(month), Integer.toString(year));
+                        } else {
+                            Event event = new Event(name, Integer.toString(startHour), Integer.toString(startMinutes),
+                                    Integer.toString(endHour), Integer.toString(endMinutes), description,
+                                    Integer.toString(day), Integer.toString(month), Integer.toString(year));
                             try{
                                 Main.tcpClient.sendData(event.concatenateData());
                                 Main.eventsList.add(event);

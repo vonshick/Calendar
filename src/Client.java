@@ -1,7 +1,6 @@
 import javax.swing.*;
 import java.io.*;
 import java.net.Socket;
-import java.util.Scanner;
 import java.util.regex.Pattern;
 
 
@@ -45,18 +44,13 @@ public class Client extends Thread{
                     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); //Close when X is clicked
                     JOptionPane.showMessageDialog(frame, "Server connection lost");
                     System.exit(0);
-                }
-                else if (serverMessage.equals("loaded")) {
-                    System.out.println("Mamy to!");
+                } else if (serverMessage.equals("loaded")) {
+                    System.out.println("Got it!");
                     break;
-                }else{
+                } else {
                     System.out.println(serverMessage);
                     String[] parts = serverMessage.split(Pattern.quote("~"));
-                    Main.eventsList.add(new Event(parts[0], parts[1], parts[2],
-                            parts[3], parts[4], parts[5], parts[6], parts[7], parts[8]));
-//                    for(String str : parts){
-//                        System.out.println(str);
-//                    }
+                    Main.eventsList.add(new Event(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], parts[8]));
                 }
 
             } catch (IOException e) {

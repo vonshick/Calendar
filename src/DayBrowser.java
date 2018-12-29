@@ -4,17 +4,17 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
-public class DayBrowser {
+class DayBrowser {
     private JFrame frame;
     private JScrollPane scrollPane; //The scrollpane
     private JButton btnAdd, btnRemove;
     private JPanel panel;
     private Container pane;
-    private JList<String> eventsList;
+    private JList eventsList;
 
-    public DayBrowser(int day, int month, int year) {
+    DayBrowser(int day, int month, int year) {
         String[] months = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
-        frame = new JFrame(Integer.toString(day)+" "+months[month]+" "+Integer.toString(year));
+        frame = new JFrame(day +" "+months[month]+" "+ year);
         frame.setSize(400, 500);
 
         //display window in the middle of the screen
@@ -26,12 +26,13 @@ public class DayBrowser {
         //add elements to the list
         DefaultListModel model = new DefaultListModel();
         eventsList = new JList(model);
+        ArrayList<Event> thisDayEvents = new ArrayList<>();
         for(Event event: Main.eventsList){
-            model.addElement(event.getName());
+            if(Integer.parseInt(event.getDay()) == day && Integer.parseInt(event.getMonth()) == month && Integer.parseInt(event.getYear()) == year) {
+                thisDayEvents.add(event);
+                model.addElement(event.getName());
+            }
         }
-//        for ( int i = 0; i < months.length; i++ ){
-//            model.addElement(months[i]);
-//        }
 
         scrollPane = new JScrollPane(eventsList);
         btnAdd = new JButton("New event" );
@@ -52,26 +53,23 @@ public class DayBrowser {
         btnRemove.setBounds(50, 420, 100, 30);
 
         //remove button action
-        btnRemove.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                DefaultListModel model = (DefaultListModel) eventsList.getModel();
-                int selectedIndex = eventsList.getSelectedIndex();
-                if (selectedIndex != -1) {
-                    //tu usuwamy z serwera!
-                    //dopiero potem z klienta
-                    String eventName = eventsList.getSelectedValue();
-                    System.out.println(eventName);
-                    model.remove(selectedIndex);
-                    Main.eventsList.remove(new Event(eventName));
-                }
+        btnRemove.addActionListener(e -> {
+            DefaultListModel model1 = (DefaultListModel) eventsList.getModel();
+            int selectedIndex = eventsList.getSelectedIndex();
+            if (selectedIndex != -1) {
+                //tu usuwamy z serwera!
+                //dopiero potem z klienta
+                Main.tcpClient.sendData("~");
+                Main.tcpClient.sendData(thisDayEvents.get(selectedIndex).concatenateData());
+                model1.remove(selectedIndex);
+                Main.eventsList.remove(thisDayEvents.get(selectedIndex));
+                thisDayEvents.remove(selectedIndex);
             }
-        } );
+        });
 
-        btnAdd.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                NewEvent newEvent = new NewEvent(day, month, year);
-            }
-        } );
+        btnAdd.addActionListener(e -> {
+            NewEvent newEvent = new NewEvent(day, month, year);
+        });
 
         frame.setResizable(false);
         frame.setVisible(true);

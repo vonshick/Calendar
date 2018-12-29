@@ -55,7 +55,7 @@ void createSample(){
     strcpy((*events[0]).description, "WITAM");
     strcpy((*events[0]).day, "12");
     strcpy((*events[0]).month, "11");
-    strcpy((*events[0]).year, "2018");
+    strcpy((*events[0]).year, "2018\n");
 
     events[1] = malloc(sizeof(struct event));
     strcpy((*events[1]).name, "jol_serwer");
@@ -66,9 +66,11 @@ void createSample(){
     strcpy((*events[1]).description, "WITAM");
     strcpy((*events[1]).day, "12");
     strcpy((*events[1]).month, "11");
-    strcpy((*events[1]).year, "2018");
+    strcpy((*events[1]).year, "2018\n");
     events_num=2;
 }
+
+//save data read from socket as an element of the 'events' global array
 void createEvent(char *data_chain)
 {
     events[events_num] = malloc(sizeof(struct event));
@@ -109,19 +111,20 @@ void createEvent(char *data_chain)
         // //printf("'%s'\n", ptr);
         ptr = strtok(NULL, delim);
     }
-    //printf("%s\n", (*events[events_num]).name);
-    //printf("%s\n", (*events[events_num]).start_hour);
-    //printf("%s\n", (*events[events_num]).start_minutes);
-    //printf("%s\n", (*events[events_num]).end_hour);
-    //printf("%s\n", (*events[events_num]).end_minutes);
-    //printf("%s\n", (*events[events_num]).description);
-    //printf("%s\n", (*events[events_num]).day);
-    //printf("%s\n", (*events[events_num]).month);
-    //printf("%s\n", (*events[events_num]).year);
+    printf("%s\n", (*events[events_num]).name);
+    printf("%s\n", (*events[events_num]).start_hour);
+    printf("%s\n", (*events[events_num]).start_minutes);
+    printf("%s\n", (*events[events_num]).end_hour);
+    printf("%s\n", (*events[events_num]).end_minutes);
+    printf("%s\n", (*events[events_num]).description);
+    printf("%s\n", (*events[events_num]).day);
+    printf("%s\n", (*events[events_num]).month);
+    printf("%s\n", (*events[events_num]).year);
 
     events_num += 1;
 }
 
+//create data chain which can be interpreted by client
 void createDataChain(char *buf, int i)
 {
     strcpy(buf, (*events[i]).name);
@@ -141,9 +144,42 @@ void createDataChain(char *buf, int i)
     strcat(buf, (*events[i]).month);
     strcat(buf, "~");
     strcat(buf, (*events[i]).year);
-    strcat(buf, "\n");
+}
 
-    // return buf;
+//remove event which has got all fields values equal to event sent by client
+void removeEvent(struct thread_data_t *th_data){
+    memset((*th_data).sentence, 0x00, 300);
+    read((*th_data).socket, (*th_data).sentence, 300);
+    char delim[] = "~";
+    char *ptr = strtok((*th_data).sentence, delim);
+    int i = 0;
+    for (i = 0; i < events_num; i++){
+        if(strcmp((*events[i]).name, ptr) == 0 ){
+            ptr = strtok(NULL, delim);
+            if(strcmp((*events[i]).start_hour, ptr) == 0 ){
+                ptr = strtok(NULL, delim);
+                if(strcmp((*events[i]).start_minutes, ptr) == 0 ){
+                    ptr = strtok(NULL, delim);
+                    if(strcmp((*events[i]).end_hour, ptr) == 0 ){
+                        ptr = strtok(NULL, delim);
+                        if(strcmp((*events[i]).end_minutes, ptr) == 0 ){
+                            ptr = strtok(NULL, delim);
+                            if(strcmp((*events[i]).description, ptr) == 0 ){
+                                ptr = strtok(NULL, delim);
+                                if(strcmp((*events[i]).day, ptr) == 0 ){
+                                    ptr = strtok(NULL, delim);
+                                    if(strcmp((*events[i]).month, ptr) == 0 ){
+                                        ptr = strtok(NULL, delim);
+                                        if(strcmp((*events[i]).year, ptr) == 0 ){
+                                            printf("Event removing...\n");
+                                            int j = i;
+                                            for (j; j<events_num-1; j++){
+                                                events[j] = events[j+1];
+                                            }
+                                            free(events[events_num]);
+                                            events_num-=1;
+                                            printf("Event removed!\n");
+    }}}}}}}}}}
 }
 
 void updateClients(struct thread_data_t *th_data)
@@ -159,10 +195,16 @@ void *ThreadBehavior(void *t_data)
     int fd = (*th_data).socket;
     while (1)
     {
+        printf("Wszedłem do wątku!\n");
         read(fd, (*th_data).sentence, 300);
-        //printf("Przeczytano: %s\n", (*th_data).sentence);
-        createEvent((*th_data).sentence);
-        // updateClients(th_data);
+        //data chain created by user can not contain '~'. We use it to let server know about removing events
+        if((*th_data).sentence[0] == '~'){
+            printf("Mam go!");
+            removeEvent(th_data);
+        }
+        else{
+            createEvent((*th_data).sentence);
+        }
         memset((*th_data).sentence, 0x00, 300);
     }
     pthread_exit(NULL);
@@ -174,31 +216,30 @@ void handleConnection(int connection_socket_descriptor)
     struct thread_data_t *t_data = malloc(sizeof(struct thread_data_t));
     (*t_data).socket = connection_socket_descriptor;
 
+    //send all existing events
     if (events_num > 0)
     {
         int i = 0;
         for (i = 0; i < events_num; i++)
         {
-            printf("jezdym\n");
             memset((*t_data).sentence, 0x00, 300);
             createDataChain((*t_data).sentence,i);
             printf("To stworzyłem: %s\n", (*t_data).sentence);
             write((*t_data).socket, (*t_data).sentence, strlen((*t_data).sentence) * sizeof(char)); // java client couldn't read string properly when size was written like 'sizeof((*th_data).sentence)'
         }
     }
-    printf("Nie wszedłym\n");
+
     // let client know that all events from server are sent
     memset((*t_data).sentence, 0x00, 300);
-    strcpy((*t_data).sentence, "loaded");
-    strcat((*t_data).sentence, "\n");
+    strcpy((*t_data).sentence, "loaded\n");
     write((*t_data).socket, (*t_data).sentence, strlen((*t_data).sentence) * sizeof(char)); // java client couldn't read string properly when size was written like 'sizeof((*th_data).sentence)'
-    printf("Tu też żem jest\n");
     pthread_t thread1;
+
     create_result = pthread_create(&thread1, NULL, ThreadBehavior, (void *)t_data);
 
     if (create_result)
     {
-        printf("Blad przy probie utworzenia watku nr 2, kod bledu: %d\n", create_result);
+        printf("Blad przy probie utworzenia watku do odczytu, kod bledu: %d\n", create_result);
         exit(-1);
     }
 }

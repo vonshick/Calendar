@@ -27,10 +27,12 @@ public class Event {
 
     public boolean equals(Object obj) {
         if (obj == null) return false;
-        if (obj == this) return true;
+//        if (obj == this) return true;
         if (!(obj instanceof Event)) return false;
-        Event o = (Event) obj;
-        return o.getName().equals(this.name);
+//        Event o = (Event) obj;
+//        return o.getName().equals(this.name);
+//        return o.getName().equals(this.name) && o.getDay().equals(this.day)
+        return (obj == this);
     }
 
     String concatenateData(){
@@ -39,75 +41,73 @@ public class Event {
                 day+"~"+month+"~"+year;
     }
 
-    String getName() {
-        return name;
-    }
+    String getName() { return name; }
 
-    public String getDescription() {
+    String getDescription() {
         return description;
     }
 
-    public String getStartHour() {
+    String getStartHour() {
         return startHour;
     }
 
-    public String getStartMinutes() {
+    String getStartMinutes() {
         return startMinutes;
     }
 
-    public String getEndHour() {
+    String getEndHour() {
         return endHour;
     }
 
-    public String getEndMinutes() {
+    String getEndMinutes() {
         return endMinutes;
     }
 
-    public String getDay() {
+    String getDay() {
         return day;
     }
 
-    public String getYear() {
+    String getYear() {
         return year;
     }
 
-    public String getMonth() {
+    String getMonth() {
         return month;
     }
 
-    public void setName(String name) {
+    void setName(String name) {
         this.name = name;
     }
 
-    public void setDescription(String description) {
+    void setDescription(String description) {
         this.description = description;
     }
 
-    public void setStartHour(String startHour) {
+    void setStartHour(String startHour) {
         this.startHour = startHour;
     }
 
-    public void setStartMinutes(String startMinutes) {
+    void setStartMinutes(String startMinutes) {
         this.startMinutes = startMinutes;
     }
 
-    public void setEndHour(String endHour) {
+    void setEndHour(String endHour) {
         this.endHour = endHour;
     }
 
-    public void setEndMinutes(String endMinutes) {
+    void setEndMinutes(String endMinutes) {
         this.endMinutes = endMinutes;
     }
 
-    public void setDay(String day) {
+    void setDay(String day) {
         this.day = day;
     }
 
-    public void setYear(String year) {
+    void setYear(String year) {
         this.year = year;
     }
 
-    public void setMonth(String month) {
+    void setMonth(String month) {
         this.month = month;
     }
 }

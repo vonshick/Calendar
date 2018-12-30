@@ -3,17 +3,17 @@ import java.awt.*;
 import java.awt.event.*;
 
 
-class NewEvent {
+class EditEvent {
     private final JFrame frame;
-    private JButton btnAdd;
+    private JButton btnChange;
     private JPanel panel;
     //    private Container pane;
     private JComboBox<Integer> cmbStartHour, cmbStartMinutes, cmbEndHour, cmbEndMinutes;
     private JTextArea txtName, txtDescription;
     private JLabel labName, labStartHour, labEndHour, labDescription;
 
-    NewEvent(int day, int month, int year) {
-        frame = new JFrame("Add new event");
+    EditEvent(Event event) {
+        frame = new JFrame("Browse event");
         frame.setSize(400, 500);
 
         //display window in the middle of the screen
@@ -24,10 +24,17 @@ class NewEvent {
 
         setUpComboBoxes();
         initializeElements();
+        setElementsValues(event);
         addElementsToPanel();
         setElementsBounds();
 
-        btnAdd.addActionListener(e -> {
+
+        btnChange.addActionListener(e -> {
+            //first remove old version of the event from main() and from the server
+            Main.tcpClient.sendData("~");
+            Main.tcpClient.sendData(event.concatenateData());
+            Main.eventsList.remove(event);
+
             String name = txtName.getText();
             String description = txtDescription.getText();
 
@@ -49,17 +56,19 @@ class NewEvent {
                         if (description.contains("~") || name.contains("~")){
                             JOptionPane.showMessageDialog(frame, "Text can not contain '~' character");
                         } else {
-                            Event event = new Event(name, Integer.toString(startHour), Integer.toString(startMinutes),
+                            Event ev = new Event(name, Integer.toString(startHour), Integer.toString(startMinutes),
                                     Integer.toString(endHour), Integer.toString(endMinutes), description,
-                                    Integer.toString(day), Integer.toString(month), Integer.toString(year));
+                                    event.getDay(), event.getMonth(), event.getYear());
                             try{
-                                Main.tcpClient.sendData(event.concatenateData());
-                                Main.eventsList.add(event);
+                                Main.tcpClient.sendData(ev.concatenateData());
+                                Main.eventsList.add(ev);
                             } catch(Exception writeException) {
                                 writeException.printStackTrace();
                             }
-                            DayBrowser browser = new DayBrowser(day, month, year);
-                            frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+                            frame.dispose();
+                            new DayBrowser(Integer.parseInt(event.getDay()),
+                                    Integer.parseInt(event.getMonth()),
+                                    Integer.parseInt(event.getYear()));
                         }
                     }
                 }
@@ -70,6 +79,15 @@ class NewEvent {
         frame.setVisible(true);
     }
 
+    private void setElementsValues(Event event){
+        txtName.setText(event.getName());
+        txtDescription.setText(event.getDescription());
+        cmbStartHour.setSelectedItem(Integer.parseInt(event.getStartHour()));
+        cmbStartMinutes.setSelectedItem(Integer.parseInt(event.getStartMinutes()));
+        cmbEndHour.setSelectedItem(Integer.parseInt(event.getEndHour()));
+        cmbEndMinutes.setSelectedItem(Integer.parseInt(event.getEndMinutes()));
+    }
+
     private void initializeElements(){
         txtName = new JTextArea();
         txtDescription = new JTextArea();
@@ -77,7 +95,7 @@ class NewEvent {
         labDescription = new JLabel("Description");
         labEndHour = new JLabel("End hour");
         labStartHour = new JLabel("Start hour");
-        btnAdd = new JButton("Add" );
+        btnChange = new JButton("Change" );
         panel = new JPanel(null);
         Container pane = frame.getContentPane();
         pane.setLayout(null);
@@ -103,7 +121,7 @@ class NewEvent {
     }
 
     private void addElementsToPanel(){
-        panel.add(btnAdd);
+        panel.add(btnChange);
         panel.add(cmbStartHour);
         panel.add(cmbStartMinutes);
         panel.add(cmbEndHour);
@@ -128,6 +146,6 @@ class NewEvent {
         cmbEndMinutes.setBounds(100, 220, 80,40);
         labDescription.setBounds(15,260,100,40);
         txtDescription.setBounds(15, 290, 350, 120);
-        btnAdd.setBounds(150, 420, 80, 30);
+        btnChange.setBounds(150, 420, 80, 30);
     }
 }

@@ -2,6 +2,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
 class DayBrowser {
@@ -57,8 +59,8 @@ class DayBrowser {
             DefaultListModel model1 = (DefaultListModel) eventsList.getModel();
             int selectedIndex = eventsList.getSelectedIndex();
             if (selectedIndex != -1) {
-                //tu usuwamy z serwera!
-                //dopiero potem z klienta
+                // '~' means for server that we are going to remove event
+                // next we send data of event to remove
                 Main.tcpClient.sendData("~");
                 Main.tcpClient.sendData(thisDayEvents.get(selectedIndex).concatenateData());
                 model1.remove(selectedIndex);
@@ -69,8 +71,19 @@ class DayBrowser {
 
         btnAdd.addActionListener(e -> {
             NewEvent newEvent = new NewEvent(day, month, year);
+            frame.dispose();
         });
 
+        eventsList.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent evt) {
+                JList list = (JList)evt.getSource();
+                if (evt.getClickCount() == 2) {
+                    int selectedIndex = eventsList.getSelectedIndex();
+                    EditEvent edit = new EditEvent(thisDayEvents.get(selectedIndex));
+                    frame.dispose();
+                }
+            }
+        });
         frame.setResizable(false);
         frame.setVisible(true);
     }

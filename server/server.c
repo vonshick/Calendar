@@ -42,8 +42,8 @@ pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 int server_socket_descriptor;
 struct event *events[100];
 int events_num = 0;
-// struct thread_data_t client_data[50];
-// int clients_count = 0;
+struct thread_data_t *client_data[50];
+int clients_count = 0;
 
 void createSample(){
     events[0] = malloc(sizeof(struct event));
@@ -146,6 +146,26 @@ void createDataChain(char *buf, int i)
     strcat(buf, (*events[i]).year);
 }
 
+void updateClients(int updating_client_socket)
+{
+    printf("No jestem!");
+
+    int i = 0;
+    for (i; i < clients_count; i++){
+        //client which made changes already have got them saved locally
+        //sending them once again is unnecessary
+        if(updating_client_socket == (*client_data[i]).socket){
+            continue;
+        }
+        int j = 0;
+        for(j; j<events_num; j++){
+            memset((*client_data[i]).sentence, 0x00, 300);
+            createDataChain((*client_data[i]).sentence, j);
+            write((*client_data[i]).socket, (*client_data[i]).sentence, strlen((*client_data[i]).sentence) * sizeof(char)); // java client couldn't read string properly when size was written like 'sizeof((*th_data).sentence)'
+        }
+    }
+}
+
 //remove event which has got all fields values equal to event sent by client
 void removeEvent(struct thread_data_t *th_data){
     memset((*th_data).sentence, 0x00, 300);
@@ -179,14 +199,10 @@ void removeEvent(struct thread_data_t *th_data){
                                             free(events[events_num]);
                                             events_num-=1;
                                             printf("Event removed!\n");
+                                            updateClients((*th_data).socket);
     }}}}}}}}}}
 }
 
-void updateClients(struct thread_data_t *th_data)
-{
-    //printf("No jestem!");
-    write((*th_data).socket, (*th_data).sentence, strlen((*th_data).sentence) * sizeof(char)); // java client couldn't read string properly when size was written like 'sizeof((*th_data).sentence)'
-}
 
 void *ThreadBehavior(void *t_data)
 {

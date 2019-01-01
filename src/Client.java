@@ -52,7 +52,7 @@ public class Client extends Thread{
                     clientSocket.close();
                     JOptionPane.showMessageDialog(frame, "Server connection lost");
                     System.exit(0);
-                } else if (serverMessage.equals("loading")) {
+                } else if (serverMessage.equals("loaded")) {
                     System.out.println("Startup data from server loaded");
                     break;
                 } else {

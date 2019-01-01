@@ -32,7 +32,7 @@ struct event {
     char year[5];
 };
 
-pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mutex_events = PTHREAD_MUTEX_INITIALIZER;
 
 int server_socket_descriptor;
 struct event *events[100];
@@ -40,7 +40,7 @@ int events_num = 0;
 struct thread_data_t *client_data[50];
 int clients_count = 0;
 
-void createSample() {
+void create_sample() {
     events[0] = malloc(sizeof(struct event));
     strcpy((*events[0]).name, "Hello from server");
     strcpy((*events[0]).start_hour, "1");
@@ -67,8 +67,8 @@ void createSample() {
 }
 
 //save data read from socket as an element of the 'events' global array
-void createEvent(char *data_chain) {
-    printf("Tworzymy wydarzenie o następującej strukturze:\n");
+void create_event(char *data_chain) {
+    printf("Creating event with a structure like:\n");
     printf("%s\n", data_chain);
     events[events_num] = malloc(sizeof(struct event));
     //dividing string into substring with '~' as a delimeter
@@ -107,21 +107,11 @@ void createEvent(char *data_chain) {
         }
         ptr = strtok(NULL, delim);
     }
-    printf("%s\n", (*events[events_num]).name);
-    printf("%s\n", (*events[events_num]).start_hour);
-    printf("%s\n", (*events[events_num]).start_minutes);
-    printf("%s\n", (*events[events_num]).end_hour);
-    printf("%s\n", (*events[events_num]).end_minutes);
-    printf("%s\n", (*events[events_num]).description);
-    printf("%s\n", (*events[events_num]).day);
-    printf("%s\n", (*events[events_num]).month);
-    printf("%s\n", (*events[events_num]).year);
-
     events_num += 1;
 }
 
 //create data chain which can be interpreted by client
-void createDataChain(char *buf, int i) {
+void create_data_chain(char *buf, int i) {
     strcpy(buf, (*events[i]).name);
     strcat(buf, "~");
     strcat(buf, (*events[i]).start_hour);
@@ -141,8 +131,8 @@ void createDataChain(char *buf, int i) {
     strcat(buf, (*events[i]).year);
 }
 
-void updateClients(int updating_client_socket) {
-    printf("Aktualizujemy pozostałych klientów\n");
+void update_clients(int updating_client_socket) {
+    printf("Update of other clients\n");
     int i = 0;
     for (i; i<clients_count; i++) {
         //client which made changes already have got them saved locally
@@ -156,19 +146,20 @@ void updateClients(int updating_client_socket) {
         int j = 0;
         for(j; j<events_num; j++){
             memset((*client_data[i]).sentence, 0x00, 300);
-            createDataChain((*client_data[i]).sentence, j);
+            create_data_chain((*client_data[i]).sentence, j);
             write((*client_data[i]).socket, (*client_data[i]).sentence, strlen((*client_data[i]).sentence) * sizeof(char)); // java client couldn't read string properly when size was written like 'sizeof((*th_data).sentence)'
         }
     }
 }
 
-void removeClient(int client_socket){
+void remove_client(int client_socket){
     int i = 0;
     for (i; i<clients_count; i++){
         if((*client_data[i]).socket == client_socket){
             printf("Closing connection to the client\n");
             int j = i;
             close((*client_data[i]).socket);
+            //clean up array
             for (j; j<clients_count-1; j++){
                 client_data[j] = client_data[j+1];
             }
@@ -180,10 +171,10 @@ void removeClient(int client_socket){
 }
 
 //remove event which has got all fields values equal to event sent by client
-void removeEvent(struct thread_data_t *th_data){
+void remove_event(struct thread_data_t *th_data){
     memset((*th_data).sentence, 0x00, 300);
     read((*th_data).socket, (*th_data).sentence, 300);
-    printf("Usuwamy dane o następującej strukturze:\n");
+    printf("Removing data with structure like:\n");
     printf("%s\n", (*th_data).sentence);
     char delim[] = "~";
     char *ptr = strtok((*th_data).sentence, delim);
@@ -214,61 +205,62 @@ void removeEvent(struct thread_data_t *th_data){
                                             free(events[events_num]);
                                             events_num-=1;
                                             printf("Event removed!\n");
-                                            updateClients((*th_data).socket);
+                                            update_clients((*th_data).socket);
 }}}}}}}}}}}
 
-
-void *ThreadBehavior(void *t_data){
+void *thread_behavior(void *t_data){
     pthread_detach(pthread_self());
     struct thread_data_t *th_data = (struct thread_data_t *)t_data;
-    int fd = (*th_data).socket;
     int bytes_count;
     while (1) {
-        bytes_count = read(fd, (*th_data).sentence, 300);
+        bytes_count = read((*th_data).socket, (*th_data).sentence, 300);
         if (bytes_count == 0) {
             printf("Connection to the client lost\n");
-            removeClient((*th_data).socket);
+            remove_client((*th_data).socket);
             break;
         }
         //data chain created by user can not contain '~'. We use it to let server know about removing events
         if((*th_data).sentence[0] == '~') {
-            removeEvent(th_data);
+            pthread_mutex_lock(&mutex_events);
+            remove_event(th_data);
+            pthread_mutex_unlock(&mutex_events);
         } else {
-            createEvent((*th_data).sentence);
-            updateClients((*th_data).socket);
+            pthread_mutex_lock(&mutex_events);
+            create_event((*th_data).sentence);
+            update_clients((*th_data).socket);
+            pthread_mutex_unlock(&mutex_events);
         }
         memset((*th_data).sentence, 0x00, 300);
     }
     pthread_exit(NULL);
 }
 
-void handleConnection(int connection_socket_descriptor) {
-    int create_thread = 0;
-//    struct thread_data_t *t_data = malloc(sizeof(struct thread_data_t));
+void handle_connection(int connection_socket_descriptor) {
+    //allocate memory for client data
     client_data[clients_count] = malloc(sizeof(struct thread_data_t));
     (*client_data[clients_count]).socket = connection_socket_descriptor;
-
-    //send all existing events
+    //send all existing events to client
     if (events_num > 0) {
         int i = 0;
         for (i = 0; i < events_num; i++) {
             memset((*client_data[clients_count]).sentence, 0x00, 300);
-            createDataChain((*client_data[clients_count]).sentence,i);
-            printf("To stworzyłem: %s\n", (*client_data[clients_count]).sentence);
+            create_data_chain((*client_data[clients_count]).sentence,i);
+            printf("Created chain: %s\n", (*client_data[clients_count]).sentence);
             write((*client_data[clients_count]).socket, (*client_data[clients_count]).sentence, strlen((*client_data[clients_count]).sentence) * sizeof(char)); // java client couldn't read string properly when size was written like 'sizeof((*th_data).sentence)'
         }
     }
     // let client know that all events from server are sent
     memset((*client_data[clients_count]).sentence, 0x00, 300);
-    strcpy((*client_data[clients_count]).sentence, "loading\n");
+    strcpy((*client_data[clients_count]).sentence, "loaded\n");
     write((*client_data[clients_count]).socket, (*client_data[clients_count]).sentence, strlen((*client_data[clients_count]).sentence) * sizeof(char)); // java client couldn't read string properly when size was written like 'sizeof((*th_data).sentence)'
     pthread_t thread;
-
-    create_thread = pthread_create(&thread, NULL, ThreadBehavior, (void *)client_data[clients_count]);
+    //create thread for connection handling
+    int create_thread = 0;
+    create_thread = pthread_create(&thread, NULL, thread_behavior, (void *)client_data[clients_count]);
     clients_count+=1;
-    printf("Aktualnie podłączyło się %d klientów\n", clients_count);
+    printf("Number of clients connected: %d\n", clients_count);
     if (create_thread) {
-        printf("Blad przy probie utworzenia watku do odczytu, kod bledu: %d\n", create_thread);
+        printf("Thread creating error: %d\n", create_thread);
         exit(-1);
     }
 }
@@ -279,9 +271,7 @@ void signal_callback_handler(int signum) {
 }
 
 int main(int argc, char *argv[]) {
-
    struct hostent* server_host_entity;
-
    if (argc != 3){
      fprintf(stderr, "To run server pass: %s <server_name> <port_number>\n", argv[0]);
      exit(1);
@@ -293,14 +283,14 @@ int main(int argc, char *argv[]) {
       exit(1);
    }
 
-    createSample();
+    create_sample();
     int connection_socket_descriptor;
     int bind_result;
     int listen_result;
     int reuse_addr_val = 1;
     struct sockaddr_in server_address;
 
-    //inicjalizacja gniazda serwera
+    //server socket initialization
     memset(&server_address, 0, sizeof(struct sockaddr));
     server_address.sin_family = AF_INET;
     memcpy(&server_address.sin_addr.s_addr, server_host_entity->h_addr, server_host_entity->h_length);
@@ -308,7 +298,7 @@ int main(int argc, char *argv[]) {
 
     server_socket_descriptor = socket(AF_INET, SOCK_STREAM, 0);
     if (server_socket_descriptor < 0) {
-        fprintf(stderr, "%s: Blad przy probie utworzenia gniazda..\n", argv[0]);
+        fprintf(stderr, "%s: Socket creating error\n", argv[0]);
         exit(1);
     }
 
@@ -318,23 +308,25 @@ int main(int argc, char *argv[]) {
 
     bind_result = bind(server_socket_descriptor, (struct sockaddr *)&server_address, sizeof(struct sockaddr));
     if (bind_result < 0) {
-        fprintf(stderr, "%s: Blad przy probie dowiazania adresu IP i numeru portu do gniazda.\n", argv[0]);
+        fprintf(stderr, "%s: Error when binding IP address and port number to the socket.\n", argv[0]);
         exit(1);
     }
 
     listen_result = listen(server_socket_descriptor, QUEUE_SIZE);
     if (listen_result < 0) {
-        fprintf(stderr, "%s: Blad przy probie ustawienia wielkosci kolejki.\n", argv[0]);
+        fprintf(stderr, "%s: Setting queue size error.\n", argv[0]);
         exit(1);
     }
 
     while (1){
         connection_socket_descriptor = accept(server_socket_descriptor, NULL, NULL);
         if (connection_socket_descriptor < 0) {
-            fprintf(stderr, "%s: Blad przy probie utworzenia gniazda dla polaczenia.\n", argv[0]);
+            fprintf(stderr, "%s: Error when creating connection socket.\n", argv[0]);
             exit(1);
         }
-        handleConnection(connection_socket_descriptor);
+        pthread_mutex_lock(&mutex_events);
+        handle_connection(connection_socket_descriptor);
+        pthread_mutex_unlock(&mutex_events);
     }
     return (0);
 }

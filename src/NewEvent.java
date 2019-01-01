@@ -30,40 +30,38 @@ class NewEvent {
         btnAdd.addActionListener(e -> {
             String name = txtName.getText();
             String description = txtDescription.getText();
-
             int startHour = (int)cmbStartHour.getSelectedItem();
             int endHour = (int)cmbEndHour.getSelectedItem();
             int startMinutes = (int)cmbStartMinutes.getSelectedItem();
             int endMinutes = (int)cmbEndMinutes.getSelectedItem();
+
             if(name.equals("")){
                 JOptionPane.showMessageDialog(frame, "Event's name can't be empty!");
-            }
-            else {
-                if(description.equals("")){
+            } else if(description.equals("")){
                     JOptionPane.showMessageDialog(frame, "Event's description can not be empty");
-                }
-                else {
-                    if (startHour > endHour || startHour==endHour && startMinutes>endMinutes) {
+                } else if (startHour > endHour || startHour==endHour && startMinutes>endMinutes) {
                         JOptionPane.showMessageDialog(frame, "Start time has to be earlier than the end time");
-                    } else {
-                        if (description.contains("~") || name.contains("~")){
+                    } else if (description.contains("~") || name.contains("~")){
                             JOptionPane.showMessageDialog(frame, "Text can not contain '~' character");
-                        } else {
-                            Event event = new Event(name, Integer.toString(startHour), Integer.toString(startMinutes),
-                                    Integer.toString(endHour), Integer.toString(endMinutes), description,
-                                    Integer.toString(day), Integer.toString(month), Integer.toString(year));
-                            try{
-                                Main.tcpClient.sendData(event.concatenateData());
-                                Main.eventsList.add(event);
-                            } catch(Exception writeException) {
-                                writeException.printStackTrace();
-                            }
-                            DayBrowser browser = new DayBrowser(day, month, year);
-                            frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
-                        }
-                    }
-                }
-            }
+                        } else if(description.length() > 100 ){
+                                JOptionPane.showMessageDialog(frame, "Description can not contain more than 100 characters");
+                            } else if(name.length() > 100 ){
+                                    JOptionPane.showMessageDialog(frame, "Name can not contain more than 100 characters");
+                                } else {
+                                    //if input is correct create Event object, send it to the server and save in Main.eventsList
+                                    Event event = new Event(name, Integer.toString(startHour), Integer.toString(startMinutes),
+                                            Integer.toString(endHour), Integer.toString(endMinutes), description,
+                                            Integer.toString(day), Integer.toString(month), Integer.toString(year));
+                                    try{
+                                        Main.tcpClient.sendData(event.concatenateData());
+                                        Main.eventsList.add(event);
+                                    } catch(Exception writeException) {
+                                        JOptionPane.showMessageDialog(frame, "Sending a message to the server failed");
+                                        writeException.printStackTrace();
+                                    }
+                                    DayBrowser browser = new DayBrowser(day, month, year);
+                                    frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+                                }
         });
 
         frame.setResizable(false);
@@ -99,7 +97,6 @@ class NewEvent {
             cmbStartMinutes.addItem(i);
             cmbEndMinutes.addItem(i);
         }
-
     }
 
     private void addElementsToPanel(){

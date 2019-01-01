@@ -4,7 +4,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 
-public class CalendarInterface extends Thread {
+class CalendarInterface extends Thread {
     private static JLabel labelMonth, labelYear;
     private static JButton buttonBack, buttonNext;
     private static JComboBox<String> comboBoxYear;
@@ -16,7 +16,7 @@ public class CalendarInterface extends Thread {
     private static JScrollPane scrollPaneCalendar; //The scrollpane
     private static int realYear, realMonth, realDay, currentYear, currentMonth;
 
-    public void run() {
+    CalendarInterface() {
 
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());

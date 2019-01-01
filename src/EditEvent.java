@@ -4,7 +4,7 @@ import java.awt.event.*;
 
 
 class EditEvent {
-    private final JFrame frame;
+    private JFrame frame;
     private JButton btnChange;
     private JPanel panel;
     //    private Container pane;
@@ -13,6 +13,17 @@ class EditEvent {
     private JLabel labName, labStartHour, labEndHour, labDescription;
 
     EditEvent(Event event) {
+        initializeElements();
+        setUpComboBoxes();
+        setElementsValues(event);
+        addElementsToPanel();
+        setElementsBounds();
+        setUpActionListeners(event);
+        frame.setResizable(false);
+        frame.setVisible(true);
+    }
+
+    private void initializeElements(){
         frame = new JFrame("Browse event");
         frame.setSize(400, 500);
 
@@ -21,74 +32,10 @@ class EditEvent {
         int x = (int) ((dimension.getWidth() - frame.getWidth()) / 2);
         int y = (int) ((dimension.getHeight() - frame.getHeight()) / 2);
         frame.setLocation(x, y);
-
-        setUpComboBoxes();
-        initializeElements();
-        setElementsValues(event);
-        addElementsToPanel();
-        setElementsBounds();
-
-
-        btnChange.addActionListener(e -> {
-            //first remove old version of the event from main() and from the server
-            Main.tcpClient.sendData("~");
-            Main.tcpClient.sendData(event.concatenateData());
-            Main.eventsList.remove(event);
-
-            String name = txtName.getText();
-            String description = txtDescription.getText();
-
-            int startHour = (int)cmbStartHour.getSelectedItem();
-            int endHour = (int)cmbEndHour.getSelectedItem();
-            int startMinutes = (int)cmbStartMinutes.getSelectedItem();
-            int endMinutes = (int)cmbEndMinutes.getSelectedItem();
-            if(name.equals("")){
-                JOptionPane.showMessageDialog(frame, "Event's name can't be empty!");
-            }
-            else {
-                if(description.equals("")){
-                    JOptionPane.showMessageDialog(frame, "Event's description can not be empty");
-                }
-                else {
-                    if (startHour > endHour || startHour==endHour && startMinutes>endMinutes) {
-                        JOptionPane.showMessageDialog(frame, "Start time has to be earlier than the end time");
-                    } else {
-                        if (description.contains("~") || name.contains("~")){
-                            JOptionPane.showMessageDialog(frame, "Text can not contain '~' character");
-                        } else {
-                            Event ev = new Event(name, Integer.toString(startHour), Integer.toString(startMinutes),
-                                    Integer.toString(endHour), Integer.toString(endMinutes), description,
-                                    event.getDay(), event.getMonth(), event.getYear());
-                            try{
-                                Main.tcpClient.sendData(ev.concatenateData());
-                                Main.eventsList.add(ev);
-                            } catch(Exception writeException) {
-                                writeException.printStackTrace();
-                            }
-                            frame.dispose();
-                            new DayBrowser(Integer.parseInt(event.getDay()),
-                                    Integer.parseInt(event.getMonth()),
-                                    Integer.parseInt(event.getYear()));
-                        }
-                    }
-                }
-            }
-        });
-
-        frame.setResizable(false);
-        frame.setVisible(true);
-    }
-
-    private void setElementsValues(Event event){
-        txtName.setText(event.getName());
-        txtDescription.setText(event.getDescription());
-        cmbStartHour.setSelectedItem(Integer.parseInt(event.getStartHour()));
-        cmbStartMinutes.setSelectedItem(Integer.parseInt(event.getStartMinutes()));
-        cmbEndHour.setSelectedItem(Integer.parseInt(event.getEndHour()));
-        cmbEndMinutes.setSelectedItem(Integer.parseInt(event.getEndMinutes()));
-    }
-
-    private void initializeElements(){
+        cmbStartHour = new JComboBox<>();
+        cmbStartMinutes = new JComboBox<>();
+        cmbEndHour = new JComboBox<>();
+        cmbEndMinutes = new JComboBox<>();
         txtName = new JTextArea();
         txtDescription = new JTextArea();
         labName = new JLabel("Name");
@@ -103,21 +50,23 @@ class EditEvent {
     }
 
     private void setUpComboBoxes(){
-        cmbStartHour = new JComboBox<>();
-        cmbStartMinutes = new JComboBox<>();
-        cmbEndHour = new JComboBox<>();
-        cmbEndMinutes = new JComboBox<>();
-
         for (int i = 0; i < 24; i++) {
             cmbStartHour.addItem(i);
             cmbEndHour.addItem(i);
         }
-
         for (int i = 0; i < 60; i++) {
             cmbStartMinutes.addItem(i);
             cmbEndMinutes.addItem(i);
         }
+    }
 
+    private void setElementsValues(Event event){
+        txtName.setText(event.getName());
+        txtDescription.setText(event.getDescription());
+        cmbStartHour.setSelectedItem(Integer.parseInt(event.getStartHour()));
+        cmbStartMinutes.setSelectedItem(Integer.parseInt(event.getStartMinutes()));
+        cmbEndHour.setSelectedItem(Integer.parseInt(event.getEndHour()));
+        cmbEndMinutes.setSelectedItem(Integer.parseInt(event.getEndMinutes()));
     }
 
     private void addElementsToPanel(){
@@ -147,5 +96,47 @@ class EditEvent {
         labDescription.setBounds(15,260,100,40);
         txtDescription.setBounds(15, 290, 350, 120);
         btnChange.setBounds(150, 420, 80, 30);
+    }
+
+    private void setUpActionListeners(Event event){
+        btnChange.addActionListener(e -> {
+            //first remove old version of the event from main() and from the server
+            Main.tcpClient.sendData("~");
+            Main.tcpClient.sendData(event.concatenateData());
+            Main.eventsList.remove(event);
+
+            //next set its values once again
+            String name = txtName.getText();
+            String description = txtDescription.getText();
+            int startHour = (int)cmbStartHour.getSelectedItem();
+            int endHour = (int)cmbEndHour.getSelectedItem();
+            int startMinutes = (int)cmbStartMinutes.getSelectedItem();
+            int endMinutes = (int)cmbEndMinutes.getSelectedItem();
+
+            if(name.equals("")){
+                JOptionPane.showMessageDialog(frame, "Event's name can't be empty!");
+            } else if(description.equals("")){
+                    JOptionPane.showMessageDialog(frame, "Event's description can not be empty");
+                }
+                else if (startHour > endHour || startHour==endHour && startMinutes>endMinutes) {
+                        JOptionPane.showMessageDialog(frame, "Start time has to be earlier than the end time");
+                    } else if (description.contains("~") || name.contains("~")){
+                            JOptionPane.showMessageDialog(frame, "Text can not contain '~' character");
+                        } else {
+                            Event ev = new Event(name, Integer.toString(startHour), Integer.toString(startMinutes),
+                                    Integer.toString(endHour), Integer.toString(endMinutes), description,
+                                    event.getDay(), event.getMonth(), event.getYear());
+                            try{
+                                Main.tcpClient.sendData(ev.concatenateData());
+                                Main.eventsList.add(ev);
+                            } catch(Exception writeException) {
+                                writeException.printStackTrace();
+                            }
+                            frame.dispose();
+                            new DayBrowser(Integer.parseInt(event.getDay()),
+                                    Integer.parseInt(event.getMonth()),
+                                    Integer.parseInt(event.getYear()));
+                        }
+        });
     }
 }

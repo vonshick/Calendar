@@ -15,11 +15,20 @@ class DayBrowser {
     private JList eventsList;
 
     DayBrowser(int day, int month, int year) {
+        ArrayList<Event> thisDayEvents = initializeElements(day, month, year);
+        addElementsToPanel();
+        setElementsBounds();
+        setUpActionListeners(thisDayEvents, day, month, year);
+        frame.setResizable(false);
+        frame.setVisible(true);
+    }
+
+    private ArrayList<Event> initializeElements(int day, int month, int year){
         String[] months = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
         frame = new JFrame(day +" "+months[month]+" "+ year);
         frame.setSize(400, 500);
 
-        //display window in the middle of the screen
+        //display frame in the middle of the screen
         Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
         int x = (int) ((dimension.getWidth() - frame.getWidth()) / 2);
         int y = (int) ((dimension.getHeight() - frame.getHeight()) / 2);
@@ -35,35 +44,40 @@ class DayBrowser {
                 model.addElement(event.getName());
             }
         }
-
         scrollPane = new JScrollPane(eventsList);
         btnAdd = new JButton("New event" );
         btnRemove = new JButton("Remove");
         pane = frame.getContentPane();
         pane.setLayout(null);
         panel = new JPanel(null);
+        return thisDayEvents;
+    }
 
+    private void addElementsToPanel(){
         pane.add(panel);
         panel.add(scrollPane);
         panel.add(btnAdd);
         panel.add(btnRemove);
+    }
 
-        //set bounds of elements
+    private void setElementsBounds(){
         panel.setBounds(10, 10, 380, 480);
         scrollPane.setBounds(10, 10, 360, 400);
         btnAdd.setBounds(250, 420, 100, 30);
         btnRemove.setBounds(50, 420, 100, 30);
+    }
 
+    private void setUpActionListeners(ArrayList<Event> thisDayEvents, int day, int month, int year){
         //remove button action
         btnRemove.addActionListener(e -> {
-            DefaultListModel model1 = (DefaultListModel) eventsList.getModel();
+            DefaultListModel model = (DefaultListModel) eventsList.getModel();
             int selectedIndex = eventsList.getSelectedIndex();
             if (selectedIndex != -1) {
                 // '~' means for server that we are going to remove event
                 // next we send data of event to remove
                 Main.tcpClient.sendData("~");
                 Main.tcpClient.sendData(thisDayEvents.get(selectedIndex).concatenateData());
-                model1.remove(selectedIndex);
+                model.remove(selectedIndex);
                 Main.eventsList.remove(thisDayEvents.get(selectedIndex));
                 thisDayEvents.remove(selectedIndex);
             }
@@ -84,7 +98,5 @@ class DayBrowser {
                 }
             }
         });
-        frame.setResizable(false);
-        frame.setVisible(true);
     }
 }

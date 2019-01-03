@@ -63,7 +63,18 @@ void create_sample() {
     strcpy((*events[1]).month, "0");
     strcpy((*events[1]).year, "2019\n");
 
-    events_num = 2;
+    events[2] = malloc(sizeof(struct event));
+    strcpy((*events[2]).name, "Hey from server");
+    strcpy((*events[2]).start_hour, "1");
+    strcpy((*events[2]).start_minutes, "5");
+    strcpy((*events[2]).end_hour, "3");
+    strcpy((*events[2]).end_minutes, "15");
+    strcpy((*events[2]).description, "Bye bye!");
+    strcpy((*events[2]).day, "8");
+    strcpy((*events[2]).month, "0");
+    strcpy((*events[2]).year, "2019\n");
+
+    events_num = 3;
 }
 
 //save data read from socket as an element of the 'events' global array
@@ -74,7 +85,7 @@ void create_event(char *data_chain) {
     //dividing string into substring with '~' as a delimeter
     char delim[] = "~";
     char *ptr = strtok(data_chain, delim);
-    int i = 0;
+    int i;
     for (i = 0; i < 9; i++) {
         switch (i){
             case 0:
@@ -133,8 +144,8 @@ void create_data_chain(char *buf, int i) {
 
 void update_clients(int updating_client_socket) {
     printf("Update of other clients\n");
-    int i = 0;
-    for (i; i<clients_count; i++) {
+    int i;
+    for (i = 0; i<clients_count; i++) {
         //client which made changes already have got them saved locally
         //sending them once again is unnecessary
         if(updating_client_socket == (*client_data[i]).socket){
@@ -143,8 +154,8 @@ void update_clients(int updating_client_socket) {
         memset((*client_data[i]).sentence, 0x00, 300);
         strcpy((*client_data[i]).sentence, "update\n"); // 'update' is the message for client which tells about data updating start
         write((*client_data[i]).socket, (*client_data[i]).sentence, strlen((*client_data[i]).sentence) * sizeof(char));
-        int j = 0;
-        for(j; j<events_num; j++){
+        int j;
+        for(j = 0; j<events_num; j++){
             memset((*client_data[i]).sentence, 0x00, 300);
             create_data_chain((*client_data[i]).sentence, j);
             write((*client_data[i]).socket, (*client_data[i]).sentence, strlen((*client_data[i]).sentence) * sizeof(char)); // java client couldn't read string properly when size was written like 'sizeof((*th_data).sentence)'
@@ -153,14 +164,14 @@ void update_clients(int updating_client_socket) {
 }
 
 void remove_client(int client_socket){
-    int i = 0;
-    for (i; i<clients_count; i++){
+    int i;
+    for (i = 0; i<clients_count; i++){
         if((*client_data[i]).socket == client_socket){
             printf("Closing connection to the client\n");
-            int j = i;
             close((*client_data[i]).socket);
+            int j;
             //clean up array
-            for (j; j<clients_count-1; j++){
+            for (j = i; j<clients_count-1; j++){
                 client_data[j] = client_data[j+1];
             }
             free(client_data[clients_count]);
@@ -178,7 +189,7 @@ void remove_event(struct thread_data_t *th_data){
     printf("%s\n", (*th_data).sentence);
     char delim[] = "~";
     char *ptr = strtok((*th_data).sentence, delim);
-    int i = 0;
+    int i;
     for (i = 0; i < events_num; i++){
         if(strcmp((*events[i]).name, ptr) == 0 ){
             ptr = strtok(NULL, delim);
@@ -198,8 +209,8 @@ void remove_event(struct thread_data_t *th_data){
                                         ptr = strtok(NULL, delim);
                                         if(strcmp((*events[i]).year, ptr) == 0 ){
                                             printf("Event removing...\n");
-                                            int j = i;
-                                            for (j; j<events_num-1; j++){
+                                            int j;
+                                            for (j = i; j<events_num-1; j++){
                                                 events[j] = events[j+1];
                                             }
                                             free(events[events_num]);
@@ -241,7 +252,7 @@ void handle_connection(int connection_socket_descriptor) {
     (*client_data[clients_count]).socket = connection_socket_descriptor;
     //send all existing events to client
     if (events_num > 0) {
-        int i = 0;
+        int i;
         for (i = 0; i < events_num; i++) {
             memset((*client_data[clients_count]).sentence, 0x00, 300);
             create_data_chain((*client_data[clients_count]).sentence,i);

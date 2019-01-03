@@ -103,8 +103,9 @@ class EditEvent {
             //first remove old version of the event from main() and from the server
             Main.tcpClient.sendData("~");
             Main.tcpClient.sendData(event.concatenateData());
-            Main.eventsList.remove(event);
-
+            synchronized (Main.eventsList) {
+                Main.eventsList.remove(event);
+            }
             //next set its values once again
             String name = txtName.getText();
             String description = txtDescription.getText();
@@ -128,7 +129,9 @@ class EditEvent {
                                     event.getDay(), event.getMonth(), event.getYear());
                             try{
                                 Main.tcpClient.sendData(ev.concatenateData());
-                                Main.eventsList.add(ev);
+                                synchronized (Main.eventsList) {
+                                    Main.eventsList.add(ev);
+                                }
                             } catch(Exception writeException) {
                                 writeException.printStackTrace();
                             }

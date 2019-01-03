@@ -38,10 +38,12 @@ class DayBrowser {
         DefaultListModel model = new DefaultListModel();
         eventsList = new JList(model);
         ArrayList<Event> thisDayEvents = new ArrayList<>();
-        for(Event event: Main.eventsList){
-            if(Integer.parseInt(event.getDay()) == day && Integer.parseInt(event.getMonth()) == month && Integer.parseInt(event.getYear()) == year) {
-                thisDayEvents.add(event);
-                model.addElement(event.getName());
+        synchronized (Main.eventsList) {
+            for(Event event: Main.eventsList){
+                if(Integer.parseInt(event.getDay()) == day && Integer.parseInt(event.getMonth()) == month && Integer.parseInt(event.getYear()) == year) {
+                    thisDayEvents.add(event);
+                    model.addElement(event.getName());
+                }
             }
         }
         scrollPane = new JScrollPane(eventsList);
@@ -78,7 +80,9 @@ class DayBrowser {
                 Main.tcpClient.sendData("~");
                 Main.tcpClient.sendData(thisDayEvents.get(selectedIndex).concatenateData());
                 model.remove(selectedIndex);
-                Main.eventsList.remove(thisDayEvents.get(selectedIndex));
+                synchronized (Main.eventsList) {
+                    Main.eventsList.remove(thisDayEvents.get(selectedIndex));
+                }
                 thisDayEvents.remove(selectedIndex);
             }
         });

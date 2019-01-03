@@ -59,7 +59,9 @@ public class Client extends Thread{
                     try {
                         System.out.println(serverMessage);
                         String[] parts = serverMessage.split(Pattern.quote("~"));
-                        Main.eventsList.add(new Event(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], parts[8]));
+                        synchronized (Main.eventsList) {
+                            Main.eventsList.add(new Event(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], parts[8]));
+                        }
                     }catch(Exception e){
                         JOptionPane.showMessageDialog(frame, "Error while processing data from server");
                     }
@@ -82,13 +84,17 @@ public class Client extends Thread{
                 }
                 else if (serverMessage.equals("update")){
                     System.out.println("Data updating");
-                    Main.eventsList.clear();
+                    synchronized (Main.eventsList) {
+                        Main.eventsList.clear();
+                    }
                 }
                 else{
                     System.out.println("New event from server");
                     String[] parts = serverMessage.split(Pattern.quote("~"));
                     System.out.println("Number of data string elements: "+parts.length);
-                    Main.eventsList.add(new Event(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], parts[8]));
+                    synchronized (Main.eventsList) {
+                        Main.eventsList.add(new Event(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], parts[8]));
+                    }
                 }
             } catch (IOException e) {
                 e.printStackTrace();

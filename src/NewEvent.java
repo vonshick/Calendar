@@ -54,7 +54,9 @@ class NewEvent {
                                             Integer.toString(day), Integer.toString(month), Integer.toString(year));
                                     try{
                                         Main.tcpClient.sendData(event.concatenateData());
-                                        Main.eventsList.add(event);
+                                        synchronized (Main.eventsList) {
+                                            Main.eventsList.add(event);
+                                        }
                                     } catch(Exception writeException) {
                                         JOptionPane.showMessageDialog(frame, "Sending a message to the server failed");
                                         writeException.printStackTrace();
